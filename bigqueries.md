@@ -224,3 +224,30 @@ order by urban_population desc
 
 ![image](https://user-images.githubusercontent.com/5347322/126318544-3e5e1ea0-3954-4ab0-896e-137c15ed9331.png)
 
+
+```sql
+
+with cte1 as 
+(select distinct country_name from `patents-public-data.worldbank_wdi.wdi_2016`
+  where indicator_name = "GDP per capita (current US$)"
+  and indicator_value > (SELECT
+avg(indicator_value)
+FROM
+  `patents-public-data.worldbank_wdi.wdi_2016`
+  where indicator_name = "GDP per capita (current US$)"
+)
+)
+ 
+select c.country_name, indicator_value as Urban_Population
+FROM
+  `patents-public-data.worldbank_wdi.wdi_2016` world 
+JOIN cte1 c 
+ON world.country_name = c.country_name
+where indicator_name = "Urban population"
+and year = 2015
+  
+``` 
+
+![image](https://user-images.githubusercontent.com/5347322/126319084-36d38f3c-4886-438d-b718-1dbd0fd949b7.png)
+
+
