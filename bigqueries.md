@@ -83,13 +83,144 @@ ORDER BY
 
 
 
-* average co2 emissions for one location over the years
+* average co2 emissions for one location and each location over the years
+
+```sql
+
+with max_value as 
+ (SELECT
+max(indicator_value) as indicator_value
+from`patents-public-data.worldbank_wdi.wdi_2016`
+where indicator_name = 'CO2 emissions (kt)'
+and country_name = 'Germany'
+)
+
+
+select * 
+from `patents-public-data.worldbank_wdi.wdi_2016` p 
+inner join max_value m 
+on m.indicator_value = p.indicator_value
+
+
+
+```
+
+
+```sql
+
+SELECT
+country_name,
+avg(indicator_value) as avg_indicator_value
+from`patents-public-data.worldbank_wdi.wdi_2016`
+where indicator_name = 'CO2 emissions (kt)'
+group by country_name 
+
+```
 
 
 * Which country's manufacturing sector has largest contribution to GDP?
+
+Finding out the year in which the max indicator value was present (simply using LIMIT) 
+
+```sql
+
+SELECT
+year,
+indicator_value
+from`patents-public-data.worldbank_wdi.wdi_2016`
+where indicator_name = 'Manufacturing, value added (% of GDP)'
+and indicator_value > 0 
+order by indicator_value desc 
+limit 1
+
+
+```
+
+
+```sql
+
+SELECT
+*
+from`patents-public-data.worldbank_wdi.wdi_2016`
+where indicator_name = 'Manufacturing, value added (% of GDP)'
+and year = 2015
+order by indicator_value desc 
+limit 1
+
+
+```
+
+
+
 * Total population for each country?
+
+
+```sql
+# select distinct indicator_name
+# FROM `patents-public-data.worldbank_wdi.wdi_2016` 
+# where lower(indicator_name) like '%population%'
+
+SELECT
+country_name ,avg(indicator_value) as Population
+FROM
+  `patents-public-data.worldbank_wdi.wdi_2016`
+  where indicator_name="Population, total"
+  group by country_name
+  
+```
+
+
+
+
+
 * i see there are some common indicator codes a bar plot should able to tell us the frequency!!
+
+```sql
+
+select year, count(indicator_value) as count_of_countries 
+FROM `patents-public-data.worldbank_wdi.wdi_2016`
+where indicator_name = 'Manufacturing, value added (% of GDP)'
+and indicator_value >0
+group by year
+order by year desc 
+
+
+```
+
 * Urban population of countries where gdp < global avergage
 
 
+```sql
+
+with avg_gdp as (
+SELECT
+avg(indicator_value) as avg_gdp_per_capita
+FROM
+  `patents-public-data.worldbank_wdi.wdi_2016`
+where indicator_name = 'GDP per capita (current US$)'
+and year = 2015
+),
+
+list_of_countries as 
+(select 
+distinct (country_name),indicator_value 
+FROM
+  `patents-public-data.worldbank_wdi.wdi_2016`
+join avg_gdp a
+on 1 = 1 
+where indicator_name = 'GDP per capita (current US$)'
+and year = 2015
+and indicator_value > a.avg_gdp_per_capita)
+
+select loc.country_name, world.indicator_value as urban_population
+FROM list_of_countries loc 
+join `patents-public-data.worldbank_wdi.wdi_2016` world
+on world.country_name = loc.country_name 
+where indicator_name = 'Urban population'
+and year = 2015
+order by urban_population desc
+```
+
+
+![image](https://user-images.githubusercontent.com/5347322/126318544-3e5e1ea0-3954-4ab0-896e-137c15ed9331.png)
 
