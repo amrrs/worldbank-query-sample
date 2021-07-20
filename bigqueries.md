@@ -248,6 +248,5 @@ and year = 2015
   
 ``` 
 
-![image](https://user-images.githubusercontent.com/5347322/126319084-36d38f3c-4886-438d-b718-1dbd0fd949b7.png)
 
 
